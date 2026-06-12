@@ -1,0 +1,5 @@
+Primera Forma Normal (1FN) - Atomicidad: Cada columna de la base de datos almacena un único valor indivisible para el negocio. Campos como Nombre y Direccion se mantuvieron unificados para simplificar la persistenciaa.
+
+Segunda Forma Normal (2FN) - Dependencia Funcional: La base de datos no tiene dependencias parciales. Cada tabla posee una Llave Primaria simple asistida por la propiedad IDENTITY. Todos los atributos que no son clave dependen de forma completa y exclusiva de su respectivo identificador unico (Id).
+
+Tercera Forma Normal (3FN) - Eliminación de Dependencias Transitivas: No existen campos que dependan indirectamente de otros campos no clave.
