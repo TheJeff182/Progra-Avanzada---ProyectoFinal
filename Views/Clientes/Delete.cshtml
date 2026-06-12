@@ -1,0 +1,34 @@
+@model Cliente
+@{
+    ViewData["Title"] = "Eliminar Cliente";
+}
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h3 class="text-danger">@ViewData["Title"]</h3>
+        <hr />
+      
+
+        <dl class="row">
+            <dt class="col-sm-3">Nombre</dt>
+            <dd class="col-sm-9">@Model.Nombre</dd>
+
+            <dt class="col-sm-3">Cédula</dt>
+            <dd class="col-sm-9">@Model.Cedula</dd>
+
+            <dt class="col-sm-3">Correo</dt>
+            <dd class="col-sm-9">@Model.Correo</dd>
+
+            <dt class="col-sm-3">Teléfono</dt>
+            <dd class="col-sm-9">@Model.Telefono</dd>
+        </dl>
+
+        <form asp-action="Delete" method="post" class="d-inline">
+            <input type="hidden" asp-for="Id" />
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-danger">Eliminar</button>
+            </div>
+        </form>
+    </div>
+</div>

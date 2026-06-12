@@ -1,0 +1,82 @@
+html {
+  font-size: 14px;
+  position: relative;
+  min-height: 100%;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+body {
+  margin-bottom: 60px;
+  background: #f4f7fb;
+}
+
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.hero-panel {
+  background: linear-gradient(135deg, #0d6efd 0%, #4ea1ff 100%);
+  color: white;
+  border-radius: 1rem;
+  box-shadow: 0 20px 40px rgba(13, 110, 253, 0.18);
+}
+
+.stat-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: 0 10px 30px rgba(31, 41, 55, 0.08);
+  height: 100%;
+}
+
+.stat-label {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.stat-value {
+  color: #0f172a;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.connection-preview {
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: #eef4ff;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  color: #0f172a;
+}
+
+.table-card,
+.form-card {
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(31, 41, 55, 0.08);
+}
+
+/* Ocultar flechas (spinners) de inputs type="number" */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="number"].form-control {
+  font-variant-numeric: normal;
+}

@@ -1,0 +1,145 @@
+@model List<Producto>
+@{
+    ViewData["Title"] = "Catalogo de Productos";
+}
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1>Catalogo de Productos PixelTico</h1>
+    </div>
+    <div class="col-md-4 text-end">
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Nuevo Producto
+        </a>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-md-6">
+                <label for="nombre" class="form-label">Nombre del Producto</label>
+                <input type="text" name="nombre" id="nombre" class="form-control" value="@ViewData["nombre"]" placeholder="Buscar por nombre...">
+            </div>
+            <div class="col-md-6">
+                <label for="categoriaId" class="form-label">Categoria</label>
+                <select name="categoriaId" id="categoriaId" class="form-select">
+                    <option value="">-- Todas las categorias --</option>
+                    @foreach (var cat in (List<Categoria>)ViewData["categories"])
+                    {
+                        <option value="@cat.Id" selected="@(ViewData["categoriaId"]?.ToString() == cat.Id.ToString())">@cat.Nombre</option>
+                    }
+                </select>
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-info">Buscar</button>
+                <a asp-action="Index" class="btn btn-secondary">Limpiar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="alert alert-info">
+        No hay productos disponibles. <a asp-action="Create">Crear uno ahora</a>
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead class="table-primary">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Categoria</th>
+                    <th>Precio</th>
+                    <th>Impuesto</th>
+                    <th>Stock</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><strong>@item.Nombre</strong></td>
+                        <td>@item.Categoria?.Nombre</td>
+                        <td>@item.Precio.ToString("C2")</td>
+                        <td>@item.ImpuestoPorc.ToString("F2")%</td>
+                        <td>
+                            @if (item.Stock > 10)
+                            {
+                                <span class="badge bg-success">@item.Stock</span>
+                            }
+                            else if (item.Stock > 0)
+                            {
+                                <span class="badge bg-warning">@item.Stock</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">@item.Stock</span>
+                            }
+                        </td>
+                        <td>
+                            @if (item.Activo)
+                            {
+                                <span class="badge bg-success">Activo</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactivo</span>
+                            }
+                        </td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="Ver">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    @if ((int?)ViewData["totalPages"] > 1)
+    {
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                @if ((int?)ViewData["currentPage"] > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-action="Index" asp-route-nombre="@ViewData["nombre"]" asp-route-categoriaId="@ViewData["categoriaId"]" asp-route-page="1">Primera</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" asp-action="Index" asp-route-nombre="@ViewData["nombre"]" asp-route-categoriaId="@ViewData["categoriaId"]" asp-route-page="@((int?)ViewData["currentPage"] - 1)">Anterior</a>
+                    </li>
+                }
+
+                @for (int i = Math.Max(1, ((int?)ViewData["currentPage"] ?? 1) - 2); i <= Math.Min((int?)ViewData["totalPages"] ?? 1, ((int?)ViewData["currentPage"] ?? 1) + 2); i++)
+                {
+                    <li class="page-item @(i == (int?)ViewData["currentPage"] ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-nombre="@ViewData["nombre"]" asp-route-categoriaId="@ViewData["categoriaId"]" asp-route-page="@i">@i</a>
+                    </li>
+                }
+
+                @if ((int?)ViewData["currentPage"] < (int?)ViewData["totalPages"])
+                {
+                    <li class="page-item">
+                        <a class="page-link" asp-action="Index" asp-route-nombre="@ViewData["nombre"]" asp-route-categoriaId="@ViewData["categoriaId"]" asp-route-page="@((int?)ViewData["currentPage"] + 1)">Siguiente</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" asp-action="Index" asp-route-nombre="@ViewData["nombre"]" asp-route-categoriaId="@ViewData["categoriaId"]" asp-route-page="@ViewData["totalPages"]">Última</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+}

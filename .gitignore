@@ -1,0 +1,67 @@
+## Rider IDE
+.idea/
+.idea_modules/
+*.sln.iml
+
+## Visual Studio
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.sln.cache
+*.rsuser
+.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+## dotnet
+.dotnet/
+.NET/
+publish/
+PublishProfiles/
+
+## NuGet
+.nuget/
+*.nupkg
+*.snupkg
+packages/
+
+## Database
+*.mdf
+*.ldf
+*.db
+*.db-shm
+*.db-wal
+
+## Logs
+logs/
+*.log
+
+## Temp files
+*.tmp
+*.temp
+obj/
+bin/
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+
+## User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates

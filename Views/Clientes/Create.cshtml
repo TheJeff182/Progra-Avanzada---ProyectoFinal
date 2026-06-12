@@ -1,0 +1,59 @@
+@model Cliente
+@{
+    ViewData["Title"] = "Crear Cliente";
+}
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h1>@ViewData["Title"]</h1>
+        <hr />
+
+        <form asp-action="Create" method="post" class="needs-validation" novalidate>
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Nombre" class="form-label"></label>
+                <input asp-for="Nombre" class="form-control" placeholder="Ej: Juan Pérez">
+                <span asp-validation-for="Nombre" class="text-danger small"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Cedula" class="form-label"></label>
+                <input asp-for="Cedula" class="form-control" placeholder="Ej: 1-1234-5678">
+                <span asp-validation-for="Cedula" class="text-danger small"></span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="Correo" class="form-label"></label>
+                        <input asp-for="Correo" class="form-control" placeholder="correo@ejemplo.com" type="email">
+                        <span asp-validation-for="Correo" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="Telefono" class="form-label"></label>
+                        <input asp-for="Telefono" class="form-control" placeholder="8765-4321" type="tel">
+                        <span asp-validation-for="Telefono" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Direccion" class="form-label"></label>
+                <textarea asp-for="Direccion" class="form-control" placeholder="Ingrese la dirección del cliente" rows="3"></textarea>
+                <span asp-validation-for="Direccion" class="text-danger small"></span>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

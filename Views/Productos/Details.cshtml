@@ -1,0 +1,58 @@
+@model Producto
+@{
+    ViewData["Title"] = "Detalles del Producto";
+}
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h1>@ViewData["Title"]</h1>
+        <hr />
+
+        <dl class="row">
+            <dt class="col-sm-3">Nombre</dt>
+            <dd class="col-sm-9">@Model.Nombre</dd>
+
+            <dt class="col-sm-3">Categoría</dt>
+            <dd class="col-sm-9">@Model.Categoria?.Nombre</dd>
+
+            <dt class="col-sm-3">Precio</dt>
+            <dd class="col-sm-9">@Model.Precio.ToString("C2")</dd>
+
+            <dt class="col-sm-3">Impuesto (%)</dt>
+            <dd class="col-sm-9">@Model.ImpuestoPorc.ToString("F2")%</dd>
+
+            <dt class="col-sm-3">Stock</dt>
+            <dd class="col-sm-9">@Model.Stock</dd>
+
+            <dt class="col-sm-3">URL Imagen</dt>
+            <dd class="col-sm-9">
+                @if (!string.IsNullOrEmpty(Model.ImagenUrl))
+                {
+                    <a href="@Model.ImagenUrl" target="_blank">Ver imagen</a>
+                }
+                else
+                {
+                    <span class="text-muted">Sin imagen</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3">Estado</dt>
+            <dd class="col-sm-9">
+                @if (Model.Activo)
+                {
+                    <span class="badge bg-success">Activo</span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">Inactivo</span>
+                }
+            </dd>
+        </dl>
+
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a asp-action="Index" class="btn btn-secondary">Volver</a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Eliminar</a>
+        </div>
+    </div>
+</div>

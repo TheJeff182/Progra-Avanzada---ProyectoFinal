@@ -1,0 +1,44 @@
+@{
+    ViewData["Title"] = "Inicio";
+}
+
+<div class="hero-panel p-4 p-lg-5 mb-4">
+    <span class="badge bg-light text-primary mb-3">PixelTico - Gestor de Inventario</span>
+    <h1 class="display-6 fw-bold">Bienvenido a PixelTico</h1>
+    <p class="lead mb-3">
+        Sistema de gestion de catalogo de consolas, videojuegos, accesorios, Funko Pop y mucho mas.
+    </p>
+    <p class="mb-0">
+        Comienza explorando el <strong>Catalogo de Productos</strong> y la <strong>Gestion de Clientes</strong> desde el menu superior.
+    </p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <h5 class="card-title">Productos</h5>
+                <p class="fs-3 fw-bold text-primary">Gestiona tu catalogo</p>
+                <a asp-controller="Productos" asp-action="Index" class="btn btn-primary btn-sm">Ir a Productos</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <h5 class="card-title">Clientes</h5>
+                <p class="fs-3 fw-bold text-success">Administra tus clientes</p>
+                <a asp-controller="Clientes" asp-action="Index" class="btn btn-success btn-sm">Ir a Clientes</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <h5 class="card-title">Proximamente</h5>
+                <p class="fs-3 fw-bold text-info">Pedidos y Reportes</p>
+                <button class="btn btn-info btn-sm" disabled>Disponible pronto</button>
+            </div>
+        </div>
+    </div>
+</div>
