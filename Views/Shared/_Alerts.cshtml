@@ -1,4 +1,34 @@
-@if (TempData["SuccessMessage"] is string message)
+@* Partial: _Alerts.cshtml
+   Muestra mensajes temporales guardados en TempData.
+   Uso desde el controlador:
+     TempData["SuccessMessage"] = "Guardado correctamente.";
+     TempData["ErrorMessage"]   = "Ocurrió un error.";
+     TempData["WarningMessage"] = "Revisa los datos.";
+*@
+
+@if (TempData["SuccessMessage"] is string success)
 {
-    <div class="alert alert-success shadow-sm">@message</div>
+    <div class="alert alert-success alert-dismissible fade show shadow-sm d-flex align-items-center gap-2" role="alert">
+        <span>✅</span>
+        <span>@success</span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] is string error)
+{
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm d-flex align-items-center gap-2" role="alert">
+        <span>❌</span>
+        <span>@error</span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+}
+
+@if (TempData["WarningMessage"] is string warning)
+{
+    <div class="alert alert-warning alert-dismissible fade show shadow-sm d-flex align-items-center gap-2" role="alert">
+        <span>⚠️</span>
+        <span>@warning</span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
 }
