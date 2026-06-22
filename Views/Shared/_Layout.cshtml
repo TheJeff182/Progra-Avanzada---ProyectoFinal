@@ -45,7 +45,32 @@
             Clientes
         </a>
 
-        <div class="pt-nav-label">Sistema</div>
+        <div class="pt-nav-label">Prototipos</div>
+
+        <a class="pt-nav-link @(ctrl == "Login" ? "active" : "")"
+           asp-controller="Prototipos" asp-action="Login">
+            Login
+        </a>
+
+        <a class="pt-nav-link @(ctrl == "Dashboard" ? "active" : "")"
+           asp-controller="Prototipos" asp-action="Dashboard">
+            Dashboard
+        </a>
+
+        <a class="pt-nav-link @(ctrl == "Reportes" ? "active" : "")"
+           asp-controller="Prototipos" asp-action="Reportes">
+            Reportes
+        </a>
+
+        <a class="pt-nav-link @(ctrl == "Ventas" ? "active" : "")"
+           asp-controller="Prototipos" asp-action="Ventas">
+            Ventas
+        </a>
+
+        <a class="pt-nav-link @(ctrl == "Usuarios" ? "active" : "")"
+           asp-controller="Prototipos" asp-action="Usuarios">
+            Usuarios
+        </a>
 
     </nav>
 
