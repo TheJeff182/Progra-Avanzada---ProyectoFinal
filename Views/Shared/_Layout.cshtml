@@ -12,37 +12,47 @@
 </head>
 <body>
 
-@{
-    var ctrl = ViewContext.RouteData.Values["controller"]?.ToString();
-    var pageTitle = ViewData["Title"]?.ToString() ?? "PixelTico";
-}
+    @{
+        var ctrl = ViewContext.RouteData.Values["controller"]?.ToString();
+        var pageTitle = ViewData["Title"]?.ToString() ?? "PixelTico";
+    }
 
-<!-- ── Sidebar ── -->
-<aside class="pt-sidebar">
-    <div class="pt-sidebar-brand">
-        <a asp-controller="Home" asp-action="Index">
-            <span>🎮</span> PixelTico
-        </a>
-        <small>Gestor de tienda</small>
-    </div>
+    <!-- ── Sidebar ── -->
+    <aside class="pt-sidebar">
+        <div class="pt-sidebar-brand">
+            <a asp-controller="Home" asp-action="Index">
+                <span>🎮</span> PixelTico
+            </a>
+            <small>Gestor de tienda</small>
+        </div>
 
-    <nav class="pt-nav">
-        <div class="pt-nav-label">General</div>
-        <a class="pt-nav-link @(ctrl == "Home" ? "active" : "")"
-           asp-controller="Home" asp-action="Index">
-           Inicio
-        </a>
+        <nav class="pt-nav">
+            <div class="pt-nav-label">General</div>
+            <a class="pt-nav-link @(ctrl == "Home" ? "active" : "")"
+               asp-controller="Home" asp-action="Index">
+                Inicio
+            </a>
 
-        <div class="pt-nav-label">Catálogo</div>
-        <a class="pt-nav-link @(ctrl == "Productos" ? "active" : "")"
-           asp-controller="Productos" asp-action="Index">
-             Productos
-        </a>
+            <div class="pt-nav-label">Catálogo</div>
+            <a class="pt-nav-link @(ctrl == "Productos" ? "active" : "")"
+               asp-controller="Productos" asp-action="Index">
+                Productos
+            </a>
 
         </a>
         <a class="pt-nav-link @(ctrl == "Clientes" ? "active" : "")"
            asp-controller="Clientes" asp-action="Index">
             Clientes
+        </a>
+
+        <div class="pt-nav-label">Ventas</div>
+        <a class="pt-nav-link @(ctrl == "Ventas" ? "active" : "")"
+           asp-controller="Ventas" asp-action="Index">
+            Nueva Venta
+        </a>
+        <a class="pt-nav-link @(ctrl == "Pedidos" ? "active" : "")"
+           asp-controller="Pedidos" asp-action="Index">
+            Historial de Ventas
         </a>
 
         <div class="pt-nav-label">Prototipos</div>
@@ -60,11 +70,6 @@
         <a class="pt-nav-link @(ctrl == "Reportes" ? "active" : "")"
            asp-controller="Prototipos" asp-action="Reportes">
             Reportes
-        </a>
-
-        <a class="pt-nav-link @(ctrl == "Ventas" ? "active" : "")"
-           asp-controller="Prototipos" asp-action="Ventas">
-            Ventas
         </a>
 
         <a class="pt-nav-link @(ctrl == "Usuarios" ? "active" : "")"

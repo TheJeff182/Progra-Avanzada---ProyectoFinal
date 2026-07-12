@@ -1,0 +1,725 @@
+﻿@{
+    ViewData["Title"] = "Nueva Venta";
+}
+
+@Html.AntiForgeryToken()
+
+<div class="row">
+
+    <div class="col-md-3">
+
+        <div class="card shadow-sm">
+            <div class="card-header">
+                Cliente
+            </div>
+
+            <div class="card-body">
+
+                <input id="buscarCliente" class="form-control mb-2"
+                       placeholder="Buscar cliente (nombre o cédula)" autocomplete="off">
+
+                <button id="btnBuscarCliente" type="button" class="btn btn-primary w-100 mb-2">
+                    Buscar
+                </button>
+
+                <div id="clientesResultado" class="list-group mb-2"></div>
+
+                <div id="clienteSeleccionado" class="alert alert-success d-none py-2 px-2 mb-0 small"></div>
+
+                <hr class="my-2">
+
+                <button id="btnMostrarNuevoCliente" type="button" class="btn btn-sm btn-outline-secondary w-100">
+                    + Cliente nuevo
+                </button>
+
+                <div id="formNuevoCliente" class="d-none mt-2">
+                    <input id="nuevoClienteNombre" class="form-control form-control-sm mb-2" placeholder="Nombre completo">
+                    <input id="nuevoClienteCedula" class="form-control form-control-sm mb-2" placeholder="Cédula">
+                    <input id="nuevoClienteCorreo" class="form-control form-control-sm mb-2" placeholder="Correo (opcional)">
+                    <input id="nuevoClienteTelefono" class="form-control form-control-sm mb-2" placeholder="Teléfono (opcional)">
+
+                    <div id="nuevoClienteError" class="text-danger small mb-2 d-none"></div>
+
+                    <div class="d-flex gap-2">
+                        <button id="btnGuardarNuevoCliente" type="button" class="btn btn-sm btn-success flex-grow-1">
+                            Guardar
+                        </button>
+                        <button id="btnCancelarNuevoCliente" type="button" class="btn btn-sm btn-outline-secondary">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col-md-5">
+
+        <div class="card shadow-sm">
+            <div class="card-header">
+                Productos
+            </div>
+
+            <div class="card-body">
+
+                <input id="buscarProducto" class="form-control mb-3"
+                       placeholder="Buscar producto" autocomplete="off">
+
+                <div id="productosMensaje" class="text-muted small mb-2 d-none"></div>
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="productosResultado">
+                        <!-- Se llena dinámicamente vía AJAX -->
+                    </tbody>
+
+                </table>
+
+                <nav aria-label="Paginación de productos">
+                    <ul id="productosPaginacion" class="pagination pagination-sm justify-content-center mb-0">
+                        <!-- Se llena dinámicamente vía JS -->
+                    </ul>
+                </nav>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="card shadow-sm">
+
+            <div class="card-header">
+                Carrito
+            </div>
+
+            <div class="card-body">
+
+                <div id="facturaMensaje" class="alert d-none py-2 px-2 small"></div>
+
+                <ul id="carritoLista" class="list-group mb-3">
+                    <!-- Se llena dinámicamente desde JS -->
+                </ul>
+
+                <div class="d-flex justify-content-between">
+                    <span>Subtotal:</span>
+                    <span id="carritoSubtotal">$0.00</span>
+                </div>
+                <div id="filaDescuentoTotal" class="d-flex justify-content-between text-danger d-none">
+                    <span>Descuento:</span>
+                    <span id="carritoDescuento">-$0.00</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Impuestos:</span>
+                    <span id="carritoImpuestos">$0.00</span>
+                </div>
+
+                <h4 class="d-flex justify-content-between">
+                    <span>Total:</span>
+                    <span id="carritoTotal">$0.00</span>
+                </h4>
+
+                <button id="btnFacturar" class="btn btn-success w-100" disabled>
+                    Facturar
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            // Carrito en memoria: { id, nombre, precio, impuestoPorc, stock, cantidad }
+            const carrito = [];
+            let clienteSeleccionadoId = null;
+
+            const inputBuscarProducto = document.getElementById('buscarProducto');
+            const tablaResultado = document.getElementById('productosResultado');
+            const mensaje = document.getElementById('productosMensaje');
+            const productosPaginacion = document.getElementById('productosPaginacion');
+
+            let terminoActual = '';
+
+            const inputBuscarCliente = document.getElementById('buscarCliente');
+            const btnBuscarCliente = document.getElementById('btnBuscarCliente');
+            const clientesResultado = document.getElementById('clientesResultado');
+            const clienteSeleccionadoDiv = document.getElementById('clienteSeleccionado');
+
+            const btnMostrarNuevoCliente = document.getElementById('btnMostrarNuevoCliente');
+            const formNuevoCliente = document.getElementById('formNuevoCliente');
+            const nuevoClienteNombre = document.getElementById('nuevoClienteNombre');
+            const nuevoClienteCedula = document.getElementById('nuevoClienteCedula');
+            const nuevoClienteCorreo = document.getElementById('nuevoClienteCorreo');
+            const nuevoClienteTelefono = document.getElementById('nuevoClienteTelefono');
+            const nuevoClienteError = document.getElementById('nuevoClienteError');
+            const btnGuardarNuevoCliente = document.getElementById('btnGuardarNuevoCliente');
+            const btnCancelarNuevoCliente = document.getElementById('btnCancelarNuevoCliente');
+
+            const carritoLista = document.getElementById('carritoLista');
+            const carritoSubtotal = document.getElementById('carritoSubtotal');
+            const carritoImpuestos = document.getElementById('carritoImpuestos');
+            const carritoTotal = document.getElementById('carritoTotal');
+            const carritoDescuento = document.getElementById('carritoDescuento');
+            const filaDescuentoTotal = document.getElementById('filaDescuentoTotal');
+            const btnFacturar = document.getElementById('btnFacturar');
+            const facturaMensaje = document.getElementById('facturaMensaje');
+
+            let debounceTimer = null;
+
+            // Mismo formato de moneda que usa el resto de la app (Producto.Precio.ToString("C2") en C#,
+            // que sin cultura configurada muestra dólares). Antes esta pantalla mostraba ₡ por error.
+            function formatoMoneda(valor) {
+                return valor.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+            }
+
+            function escapeHtml(texto) {
+                const div = document.createElement('div');
+                div.textContent = texto;
+                return div.innerHTML;
+            }
+
+            function getAntiForgeryToken() {
+                const input = document.querySelector('input[name="__RequestVerificationToken"]');
+                return input ? input.value : '';
+            }
+
+            // ================== PRODUCTOS (búsqueda en vivo + paginación) ==================
+
+            function mostrarMensajeProductos(texto) {
+                mensaje.textContent = texto;
+                mensaje.classList.toggle('d-none', !texto);
+            }
+
+            async function buscarProductos(termino, pagina) {
+                try {
+                    const resp = await fetch('/Productos/Buscar?termino=' + encodeURIComponent(termino || '') + '&pagina=' + pagina);
+                    if (!resp.ok) throw new Error('Error de red: ' + resp.status);
+                    const data = await resp.json();
+                    renderResultadosProductos(data);
+                } catch (err) {
+                    console.error(err);
+                    tablaResultado.innerHTML = '';
+                    productosPaginacion.innerHTML = '';
+                    mostrarMensajeProductos('No se pudieron cargar los productos. Intenta de nuevo.');
+                }
+            }
+
+            function renderResultadosProductos(data) {
+                const productos = data.productos || [];
+                tablaResultado.innerHTML = '';
+
+                if (productos.length === 0) {
+                    mostrarMensajeProductos('No se encontraron productos.');
+                    productosPaginacion.innerHTML = '';
+                    return;
+                }
+                mostrarMensajeProductos('');
+
+                productos.forEach(function (p) {
+                    const sinStock = p.stock === 0;
+
+                    const tr = document.createElement('tr');
+                    if (sinStock) tr.classList.add('table-danger');
+
+                    tr.innerHTML =
+                        '<td>' + escapeHtml(p.nombre) + '</td>' +
+                        '<td>' + formatoMoneda(p.precio) + '</td>' +
+                        '<td>' + (sinStock ? '<span class="text-danger fw-semibold">Sin stock</span>' : p.stock) + '</td>' +
+                        '<td>' + (sinStock
+                            ? '<button type="button" class="btn btn-sm btn-outline-secondary" disabled>Agregar</button>'
+                            : '<button type="button" class="btn btn-sm btn-outline-primary btn-agregar">Agregar</button>') +
+                        '</td>';
+
+                    if (!sinStock) {
+                        tr.querySelector('.btn-agregar').addEventListener('click', function () {
+                            agregarAlCarrito(p);
+                        });
+                    }
+
+                    tablaResultado.appendChild(tr);
+                });
+
+                renderPaginacion(data.pagina, data.totalPaginas);
+            }
+
+            // Paginador con el mismo estilo que Productos/Index (Primera, Anterior, números, Siguiente, Última),
+            // pero disparando fetch por AJAX en vez de recargar la página.
+            function renderPaginacion(paginaActual, totalPaginas) {
+                productosPaginacion.innerHTML = '';
+
+                if (totalPaginas <= 1) return;
+
+                function agregarItem(etiqueta, pagina, activo, deshabilitado) {
+                    const li = document.createElement('li');
+                    li.className = 'page-item' + (activo ? ' active' : '') + (deshabilitado ? ' disabled' : '');
+
+                    const a = document.createElement('a');
+                    a.className = 'page-link';
+                    a.href = '#';
+                    a.textContent = etiqueta;
+
+                    if (!activo && !deshabilitado) {
+                        a.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            buscarProductos(terminoActual, pagina);
+                        });
+                    }
+
+                    li.appendChild(a);
+                    productosPaginacion.appendChild(li);
+                }
+
+                if (paginaActual > 1) {
+                    agregarItem('Primera', 1, false, false);
+                    agregarItem('Anterior', paginaActual - 1, false, false);
+                }
+
+                const desde = Math.max(1, paginaActual - 2);
+                const hasta = Math.min(totalPaginas, paginaActual + 2);
+
+                for (let i = desde; i <= hasta; i++) {
+                    agregarItem(String(i), i, i === paginaActual, false);
+                }
+
+                if (paginaActual < totalPaginas) {
+                    agregarItem('Siguiente', paginaActual + 1, false, false);
+                    agregarItem('Última', totalPaginas, false, false);
+                }
+            }
+
+            inputBuscarProducto.addEventListener('input', function () {
+                clearTimeout(debounceTimer);
+                const termino = inputBuscarProducto.value.trim();
+                debounceTimer = setTimeout(function () {
+                    terminoActual = termino;
+                    buscarProductos(termino, 1);
+                }, 300);
+            });
+
+            buscarProductos('', 1); // carga inicial
+
+            // ================== CARRITO ==================
+
+            function agregarAlCarrito(producto) {
+                const existente = carrito.find(function (item) { return item.id === producto.id; });
+
+                if (existente) {
+                    if (existente.cantidad < producto.stock) {
+                        existente.cantidad++;
+                    }
+                } else {
+                    carrito.push({
+                        id: producto.id,
+                        nombre: producto.nombre,
+                        precio: producto.precio,
+                        impuestoPorc: producto.impuestoPorc,
+                        stock: producto.stock,
+                        cantidad: 1,
+                        cantidadValida: true,
+                        descuento: 0,
+                        descuentoValida: true
+                    });
+                }
+
+                renderCarrito();
+            }
+
+            function quitarDelCarrito(id) {
+                const idx = carrito.findIndex(function (item) { return item.id === id; });
+                if (idx !== -1) carrito.splice(idx, 1);
+                renderCarrito();
+            }
+
+            function cambiarCantidad(item, inputEl, feedbackEl) {
+                const valor = parseInt(inputEl.value, 10);
+                let valido = true;
+                let mensaje = '';
+
+                if (isNaN(valor) || valor < 1) {
+                    valido = false;
+                    mensaje = 'La cantidad mínima es 1';
+                } else if (valor > item.stock) {
+                    valido = false;
+                    mensaje = 'Solo hay ' + item.stock + ' disponibles';
+                }
+
+                // Guardamos el valor tal cual lo escribió el usuario (sin forzarlo) y marcamos
+                // si es válido o no. La corrección la hace la persona, no el sistema.
+                item.cantidad = isNaN(valor) ? 0 : valor;
+                item.cantidadValida = valido;
+
+                inputEl.classList.toggle('is-invalid', !valido);
+                feedbackEl.textContent = mensaje;
+                feedbackEl.classList.toggle('d-none', valido);
+
+                calcularTotales();
+                actualizarEstadoBotonFacturar();
+            }
+
+            function cambiarDescuento(item, inputEl, feedbackEl) {
+                const texto = inputEl.value.trim();
+                let valido = true;
+                let mensaje = '';
+                let valor = 0;
+
+                if (texto === '') {
+                    valor = 0; // sin descuento
+                } else {
+                    valor = parseFloat(texto);
+                    if (isNaN(valor) || valor < 0) {
+                        valido = false;
+                        mensaje = 'El descuento no puede ser negativo';
+                        valor = 0;
+                    } else if (valor > 100) {
+                        valido = false;
+                        mensaje = 'El descuento no puede superar 100%';
+                    }
+                }
+
+                item.descuento = valor;
+                item.descuentoValida = valido;
+
+                inputEl.classList.toggle('is-invalid', !valido);
+                feedbackEl.textContent = mensaje;
+                feedbackEl.classList.toggle('d-none', valido);
+
+                calcularTotales();
+                actualizarEstadoBotonFacturar();
+            }
+
+            function renderCarrito() {
+                carritoLista.innerHTML = '';
+
+                if (carrito.length === 0) {
+                    carritoLista.innerHTML = '<li class="list-group-item text-muted">El carrito está vacío</li>';
+                }
+
+                carrito.forEach(function (item) {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item';
+                    li.innerHTML =
+                        '<div class="d-flex justify-content-between align-items-center mb-1">' +
+                            '<span>' + escapeHtml(item.nombre) + '</span>' +
+                            '<button type="button" class="btn btn-sm btn-link text-danger p-0 btn-quitar">Quitar</button>' +
+                        '</div>' +
+                        '<div class="d-flex justify-content-between align-items-start mb-1">' +
+                            '<div>' +
+                                '<label class="form-text mb-0">Cantidad</label>' +
+                                '<input type="number" min="1" max="' + item.stock + '" value="' + item.cantidad + '" class="form-control form-control-sm input-cantidad" style="width: 90px;">' +
+                                '<div class="invalid-feedback d-none small mt-0">Mensaje</div>' +
+                            '</div>' +
+                            '<span class="text-muted small">' + formatoMoneda(item.precio) + ' c/u</span>' +
+                        '</div>' +
+                        '<div>' +
+                            '<label class="form-text mb-0">Descuento (%)</label>' +
+                            '<input type="number" min="0" max="100" step="0.1" value="' + item.descuento + '" class="form-control form-control-sm input-descuento" style="width: 90px;">' +
+                            '<div class="invalid-feedback d-none small mt-0">Mensaje</div>' +
+                        '</div>';
+
+                    li.querySelector('.btn-quitar').addEventListener('click', function () {
+                        quitarDelCarrito(item.id);
+                    });
+
+                    const inputCantidad = li.querySelector('.input-cantidad');
+                    const feedbackCantidad = li.querySelectorAll('.invalid-feedback')[0];
+
+                    inputCantidad.addEventListener('input', function () {
+                        cambiarCantidad(item, inputCantidad, feedbackCantidad);
+                    });
+
+                    const inputDescuento = li.querySelector('.input-descuento');
+                    const feedbackDescuento = li.querySelectorAll('.invalid-feedback')[1];
+
+                    inputDescuento.addEventListener('input', function () {
+                        cambiarDescuento(item, inputDescuento, feedbackDescuento);
+                    });
+
+                    carritoLista.appendChild(li);
+                });
+
+                calcularTotales();
+                actualizarEstadoBotonFacturar();
+            }
+
+            // Cálculo de totales EN VIVO vía AJAX: se envían las líneas del carrito al endpoint
+            // POST /api/pedidos/calcular y el servidor responde con subtotal/impuestos/total ya
+            // recalculados (nunca se confía únicamente en la matemática hecha en el navegador).
+            let calcularDebounce = null;
+
+            function calcularTotales() {
+                clearTimeout(calcularDebounce);
+                calcularDebounce = setTimeout(enviarCalculo, 250);
+            }
+
+            async function enviarCalculo() {
+                const lineasValidas = carrito.filter(function (item) {
+                    return item.cantidadValida !== false && item.descuentoValida !== false && item.cantidad > 0;
+                });
+
+                if (lineasValidas.length === 0) {
+                    carritoSubtotal.textContent = formatoMoneda(0);
+                    carritoImpuestos.textContent = formatoMoneda(0);
+                    carritoTotal.textContent = formatoMoneda(0);
+                    filaDescuentoTotal.classList.add('d-none');
+                    return;
+                }
+
+                const payload = lineasValidas.map(function (item) {
+                    return { productoId: item.id, cantidad: item.cantidad, descuento: item.descuento || 0 };
+                });
+
+                try {
+                    const resp = await fetch('/api/pedidos/calcular', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!resp.ok) throw new Error('Error de red: ' + resp.status);
+                    const data = await resp.json();
+
+                    carritoSubtotal.textContent = formatoMoneda(data.subtotal);
+                    carritoImpuestos.textContent = formatoMoneda(data.impuestos);
+                    carritoTotal.textContent = formatoMoneda(data.total);
+
+                    // Línea "Descuento": cuánto se está rebajando en total, en dólares.
+                    // Solo se muestra si hay algún descuento aplicado (> 0).
+                    if (data.descuento > 0) {
+                        carritoDescuento.textContent = '-' + formatoMoneda(data.descuento);
+                        filaDescuentoTotal.classList.remove('d-none');
+                    } else {
+                        filaDescuentoTotal.classList.add('d-none');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    carritoSubtotal.textContent = '—';
+                    carritoImpuestos.textContent = '—';
+                    carritoTotal.textContent = '—';
+                    filaDescuentoTotal.classList.add('d-none');
+                }
+            }
+
+            renderCarrito();
+
+            // ================== CLIENTE (búsqueda) ==================
+
+            async function buscarClientes(termino) {
+                try {
+                    const resp = await fetch('/Clientes/Buscar?termino=' + encodeURIComponent(termino || ''));
+                    if (!resp.ok) throw new Error('Error de red: ' + resp.status);
+                    const clientes = await resp.json();
+                    renderResultadosClientes(clientes);
+                } catch (err) {
+                    console.error(err);
+                    clientesResultado.innerHTML = '<div class="text-danger small">No se pudo buscar clientes.</div>';
+                }
+            }
+
+            function renderResultadosClientes(clientes) {
+                clientesResultado.innerHTML = '';
+
+                if (!clientes || clientes.length === 0) {
+                    clientesResultado.innerHTML = '<div class="text-muted small">Sin resultados.</div>';
+                    return;
+                }
+
+                clientes.forEach(function (c) {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'list-group-item list-group-item-action';
+                    btn.innerHTML = '<strong>' + escapeHtml(c.nombre) + '</strong><br><span class="small text-muted">' + escapeHtml(c.cedula) + '</span>';
+
+                    btn.addEventListener('click', function () {
+                        seleccionarCliente(c);
+                    });
+
+                    clientesResultado.appendChild(btn);
+                });
+            }
+
+            function seleccionarCliente(cliente) {
+                clienteSeleccionadoId = cliente.id;
+                clientesResultado.innerHTML = '';
+                inputBuscarCliente.value = '';
+
+                clienteSeleccionadoDiv.textContent = 'Cliente: ' + cliente.nombre + ' (' + cliente.cedula + ')';
+                clienteSeleccionadoDiv.classList.remove('d-none');
+
+                ocultarFormNuevoCliente();
+                actualizarEstadoBotonFacturar();
+            }
+
+            // ================== CLIENTE (crear rápido, sin salir de Ventas) ==================
+
+            function mostrarErrorNuevoCliente(texto) {
+                nuevoClienteError.textContent = texto;
+                nuevoClienteError.classList.toggle('d-none', !texto);
+            }
+
+            function ocultarFormNuevoCliente() {
+                formNuevoCliente.classList.add('d-none');
+                nuevoClienteNombre.value = '';
+                nuevoClienteCedula.value = '';
+                nuevoClienteCorreo.value = '';
+                nuevoClienteTelefono.value = '';
+                mostrarErrorNuevoCliente('');
+            }
+
+            btnMostrarNuevoCliente.addEventListener('click', function () {
+                formNuevoCliente.classList.toggle('d-none');
+            });
+
+            btnCancelarNuevoCliente.addEventListener('click', function () {
+                ocultarFormNuevoCliente();
+            });
+
+            btnGuardarNuevoCliente.addEventListener('click', async function () {
+                const nombre = nuevoClienteNombre.value.trim();
+                const cedula = nuevoClienteCedula.value.trim();
+
+                if (!nombre || !cedula) {
+                    mostrarErrorNuevoCliente('Nombre y cédula son requeridos.');
+                    return;
+                }
+
+                mostrarErrorNuevoCliente('');
+                btnGuardarNuevoCliente.disabled = true;
+                btnGuardarNuevoCliente.textContent = 'Guardando...';
+
+                try {
+                    const resp = await fetch('/Clientes/CrearRapido', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': getAntiForgeryToken()
+                        },
+                        body: JSON.stringify({
+                            nombre: nombre,
+                            cedula: cedula,
+                            correo: nuevoClienteCorreo.value.trim(),
+                            telefono: nuevoClienteTelefono.value.trim()
+                        })
+                    });
+
+                    const data = await resp.json();
+
+                    if (!resp.ok) {
+                        mostrarErrorNuevoCliente(data.error || 'No se pudo crear el cliente.');
+                        return;
+                    }
+
+                    // El cliente recién creado queda seleccionado automáticamente
+                    seleccionarCliente({ id: data.id, nombre: data.nombre, cedula: data.cedula });
+                } catch (err) {
+                    console.error(err);
+                    mostrarErrorNuevoCliente('Error de conexión al crear el cliente.');
+                } finally {
+                    btnGuardarNuevoCliente.disabled = false;
+                    btnGuardarNuevoCliente.textContent = 'Guardar';
+                }
+            });
+
+            btnBuscarCliente.addEventListener('click', function () {
+                buscarClientes(inputBuscarCliente.value.trim());
+            });
+
+            inputBuscarCliente.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    buscarClientes(inputBuscarCliente.value.trim());
+                }
+            });
+
+            // ================== FACTURAR ==================
+
+            function actualizarEstadoBotonFacturar() {
+                const hayInvalidos = carrito.some(function (item) {
+                    return item.cantidadValida === false || item.descuentoValida === false;
+                });
+                btnFacturar.disabled = carrito.length === 0 || !clienteSeleccionadoId || hayInvalidos;
+            }
+
+            function mostrarMensajeFactura(html, tipo) {
+                facturaMensaje.innerHTML = html;
+                facturaMensaje.className = 'alert py-2 px-2 small alert-' + tipo;
+            }
+
+            btnFacturar.addEventListener('click', async function () {
+                const hayInvalidos = carrito.some(function (item) {
+                    return item.cantidadValida === false || item.descuentoValida === false;
+                });
+
+                if (carrito.length === 0 || !clienteSeleccionadoId || hayInvalidos) {
+                    if (hayInvalidos) {
+                        mostrarMensajeFactura('Corrige las cantidades o descuentos marcados en rojo antes de facturar.', 'danger');
+                    }
+                    return;
+                }
+
+                btnFacturar.disabled = true;
+                btnFacturar.textContent = 'Procesando...';
+
+                const payload = {
+                    clienteId: clienteSeleccionadoId,
+                    items: carrito.map(function (item) {
+                        return { productoId: item.id, cantidad: item.cantidad, descuento: item.descuento || 0 };
+                    })
+                };
+
+                try {
+                    const resp = await fetch('/Pedidos/Crear', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': getAntiForgeryToken()
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    const data = await resp.json();
+
+                    if (!resp.ok) {
+                        mostrarMensajeFactura(escapeHtml(data.error || 'No se pudo procesar la venta.'), 'danger');
+                        return;
+                    }
+
+                    mostrarMensajeFactura(
+                        'Venta #' + data.pedidoId + ' registrada correctamente. Total: ' + formatoMoneda(data.total) +
+                        ' — <a href="/Pedidos/Details/' + data.pedidoId + '" class="alert-link">Ver factura</a>',
+                        'success'
+                    );
+
+                    // Reiniciar carrito y cliente para la siguiente venta
+                    carrito.length = 0;
+                    clienteSeleccionadoId = null;
+                    clienteSeleccionadoDiv.classList.add('d-none');
+                    renderCarrito();
+                    terminoActual = inputBuscarProducto.value.trim();
+                    buscarProductos(terminoActual, 1); // refresca stock visible desde la página 1
+                } catch (err) {
+                    console.error(err);
+                    mostrarMensajeFactura('Error de conexión al procesar la venta.', 'danger');
+                } finally {
+                    btnFacturar.textContent = 'Facturar';
+                    actualizarEstadoBotonFacturar();
+                }
+            });
+        })();
+    </script>
+}

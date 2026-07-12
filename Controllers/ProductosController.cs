@@ -212,4 +212,99 @@ public class ProductosController : Controller
     {
         return await _context.Productos.AnyAsync(e => e.Id == id);
     }
+
+    // GET: Productos/Buscar?termino=play&pagina=1
+    // Endpoint API (JSON) usado por AJAX para la búsqueda en vivo en la pantalla de Ventas.
+    // Devuelve resultados paginados de 20 en 20 (los agotados siempre al final).
+    private const int BuscarPageSize = 20;
+
+    [HttpGet]
+    public async Task<IActionResult> Buscar(string? termino, int pagina = 1)
+    {
+        try
+        {
+            if (pagina < 1) pagina = 1;
+
+            var query = _context.Productos
+                .Where(p => p.Activo)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(termino))
+            {
+                query = query.Where(p => p.Nombre.Contains(termino));
+            }
+
+            query = query
+                .OrderBy(p => p.Stock == 0) // false (0) primero => con stock antes que sin stock
+                .ThenBy(p => p.Nombre);
+
+            var total = await query.CountAsync();
+
+            var productos = await query
+                .Skip((pagina - 1) * BuscarPageSize)
+                .Take(BuscarPageSize)
+                .Select(p => new
+                {
+                    id = p.Id,
+                    nombre = p.Nombre,
+                    precio = p.Precio,
+                    impuestoPorc = p.ImpuestoPorc,
+                    stock = p.Stock,
+                    imagenUrl = p.ImagenUrl
+                })
+                .ToListAsync();
+
+            var hasMore = pagina * BuscarPageSize < total;
+            var totalPaginas = (int)Math.Ceiling(total / (double)BuscarPageSize);
+
+            return Json(new { productos, pagina, hasMore, total, totalPaginas });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al buscar productos");
+            return StatusCode(500, new { error = "Error al buscar productos" });
+        }
+    }
+
+    // GET: /api/productos/buscar?q=play
+    // Endpoint conforme al enunciado del proyecto (sección 3): autosuggest AJAX,
+    // hasta 10 coincidencias, forma de respuesta { id, nombre, precio, impuesto, stock }.
+    // TODO: agregar [Authorize] cuando Identity esté integrado (el enunciado pide que
+    // solo usuarios autenticados puedan consumir los endpoints de la API).
+    [HttpGet]
+    [Route("/api/productos/buscar")]
+    public async Task<IActionResult> BuscarApi(string? q)
+    {
+        try
+        {
+            var query = _context.Productos
+                .Where(p => p.Activo && p.Stock > 0)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                query = query.Where(p => p.Nombre.Contains(q));
+            }
+
+            var productos = await query
+                .OrderBy(p => p.Nombre)
+                .Take(10)
+                .Select(p => new
+                {
+                    id = p.Id,
+                    nombre = p.Nombre,
+                    precio = p.Precio,
+                    impuesto = p.ImpuestoPorc,
+                    stock = p.Stock
+                })
+                .ToListAsync();
+
+            return Json(productos);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al buscar productos (API)");
+            return StatusCode(500, new { error = "Error al buscar productos" });
+        }
+    }
 }

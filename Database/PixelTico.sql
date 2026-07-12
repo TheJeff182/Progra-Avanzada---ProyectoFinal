@@ -156,3 +156,8 @@ INSERT INTO Cliente (Nombre, Cedula, Correo, Telefono, Direccion) VALUES
 ('Grogu', '812345678', 'grogu@email.com', '5558901234', 'Paraiso, Cartago'),
 ('Ash Ketchum', '913456789', 'ash.ketchum@email.com', '5559012345', 'Santo Domingo, Heredia'),
 ('Lara Croft', '104567890', 'lara.croft@email.com', '5550123456', 'Escazu, San Jose');
+
+
+-- 4. INSERTAR USUARIO ADMIN
+INSERT INTO Usuario (Nombre, Email, PasswordHash, Rol) VALUES
+('Administrador', 'admin@pixeltico.com', NULL, 'Admin');

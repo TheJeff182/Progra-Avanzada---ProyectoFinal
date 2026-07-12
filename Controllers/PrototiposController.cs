@@ -23,10 +23,6 @@ namespace TuProyecto.Controllers
         {
             return View();
         }
-        public IActionResult Ventas()
-        {
-            return View();
-        }
 
     }
 }

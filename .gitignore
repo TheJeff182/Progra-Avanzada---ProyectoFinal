@@ -1,0 +1,28 @@
+## Carpetas de compilación (.NET) — se regeneran solas con dotnet build/run
+[Bb]in/
+[Oo]bj/
+
+## Visual Studio / VS Code
+.vs/
+.vscode/
+*.user
+*.suo
+
+## Rider / JetBrains
+.idea/
+
+## Logs y archivos temporales
+*.log
+*.tmp
+
+## Archivos de sistema operativo
+.DS_Store
+Thumbs.db
+
+## Secretos locales (si algún día usan User Secrets o .env)
+appsettings.*.local.json
+.env
+
+## Publicación
+publish/
+*.pdb

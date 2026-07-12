@@ -205,4 +205,101 @@ public class ClientesController : Controller
     {
         return await _context.Clientes.AnyAsync(e => e.Id == id);
     }
+
+    // GET: Clientes/Buscar?termino=xxx
+    // Endpoint API (JSON) usado por AJAX en la pantalla de Ventas.
+    [HttpGet]
+    public async Task<IActionResult> Buscar(string? termino)
+    {
+        try
+        {
+            var query = _context.Clientes.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(termino))
+            {
+                query = query.Where(c => c.Nombre.Contains(termino) || c.Cedula.Contains(termino));
+            }
+
+            var clientes = await query
+                .OrderBy(c => c.Nombre)
+                .Take(10)
+                .Select(c => new
+                {
+                    id = c.Id,
+                    nombre = c.Nombre,
+                    cedula = c.Cedula
+                })
+                .ToListAsync();
+
+            return Json(clientes);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al buscar clientes");
+            return StatusCode(500, new { error = "Error al buscar clientes" });
+        }
+    }
+
+    public class CrearClienteRapidoDto
+    {
+        public string Nombre { get; set; } = string.Empty;
+        public string Cedula { get; set; } = string.Empty;
+        public string? Correo { get; set; }
+        public string? Telefono { get; set; }
+    }
+
+    // POST: Clientes/CrearRapido
+    // Endpoint API (JSON) usado por AJAX desde Ventas, para no obligar a salir de esa pantalla
+    // cuando el cliente que se busca todavía no existe en el sistema.
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> CrearRapido([FromBody] CrearClienteRapidoDto request)
+    {
+        if (request == null || string.IsNullOrWhiteSpace(request.Nombre) || string.IsNullOrWhiteSpace(request.Cedula))
+        {
+            return BadRequest(new { error = "Nombre y cédula son requeridos" });
+        }
+
+        var cliente = new Cliente
+        {
+            Nombre = request.Nombre.Trim(),
+            Cedula = request.Cedula.Trim(),
+            Correo = string.IsNullOrWhiteSpace(request.Correo) ? null : request.Correo.Trim(),
+            Telefono = string.IsNullOrWhiteSpace(request.Telefono) ? null : request.Telefono.Trim()
+        };
+
+        if (!TryValidateModel(cliente))
+        {
+            var errores = ModelState.Values
+                .SelectMany(v => v.Errors)
+                .Select(e => e.ErrorMessage)
+                .ToList();
+
+            return BadRequest(new { error = string.Join(" ", errores) });
+        }
+
+        if (await _context.Clientes.AnyAsync(c => c.Cedula == cliente.Cedula))
+        {
+            return BadRequest(new { error = "Ya existe un cliente con esa cédula" });
+        }
+
+        try
+        {
+            _context.Clientes.Add(cliente);
+            await _context.SaveChangesAsync();
+
+            return Json(new
+            {
+                success = true,
+                id = cliente.Id,
+                nombre = cliente.Nombre,
+                cedula = cliente.Cedula
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error al crear cliente rápido");
+            return StatusCode(500, new { error = "Error al guardar el cliente" });
+        }
+    }
 }
