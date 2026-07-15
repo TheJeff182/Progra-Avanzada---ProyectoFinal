@@ -89,9 +89,21 @@
     <span class="pt-topbar-title">@pageTitle</span>
     <div class="pt-topbar-right">
         <span>@DateTime.Now.ToString("dd/MM/yyyy")</span>
-        <div class="pt-user-badge">
-            <div class="pt-avatar">AD</div>
-            Admin
+        <div>
+            @if (User?.Identity?.IsAuthenticated ?? false)
+            {
+                <div class="pt-user-badge">
+                    <div class="pt-avatar">@User.Identity.Name?.Substring(0,1).ToUpper()</div>
+                    @User.Identity.Name
+                    <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline; margin-left:8px;">
+                        <button type="submit" class="btn btn-sm btn-outline-light">Cerrar sesión</button>
+                    </form>
+                </div>
+            }
+            else
+            {
+                <a class="btn btn-sm btn-outline-light" asp-controller="Account" asp-action="Login">Iniciar sesión</a>
+            }
         </div>
     </div>
 </div>
