@@ -159,6 +159,23 @@
     letter-spacing: 0.05em;
 }
 
+/* ── Card borders por color ── */
+.border-left-primary {
+    border-left: 4px solid #0d6efd !important;
+}
+
+.border-left-success {
+    border-left: 4px solid #198754 !important;
+}
+
+.border-left-warning {
+    border-left: 4px solid #ffc107 !important;
+}
+
+.border-left-danger {
+    border-left: 4px solid #dc3545 !important;
+}
+
 /* ── Main content ── */
 .pt-main {
     margin-left: var(--sidebar-width);

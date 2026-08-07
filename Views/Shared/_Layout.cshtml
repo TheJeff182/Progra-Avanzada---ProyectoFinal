@@ -65,18 +65,19 @@
             @if (isAdmin)
             {
                 <div class="pt-nav-label">Administración</div>
-                <a class="pt-nav-link @(ctrl == "Prototipos" && ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")"
+                <!--  <a class="pt-nav-link @(ctrl == "Prototipos" && ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")"
                    asp-controller="Prototipos" asp-action="Dashboard">
-                    Dashboard
-                </a>
+                    Dashboard 
+            </a>  -->
+
                 <a class="pt-nav-link @(ctrl == "Prototipos" && ViewContext.RouteData.Values["action"]?.ToString() == "Reportes" ? "active" : "")"
                    asp-controller="Prototipos" asp-action="Reportes">
                     Reportes
                 </a>
-                <a class="pt-nav-link @(ctrl == "Prototipos" && ViewContext.RouteData.Values["action"]?.ToString() == "Usuarios" ? "active" : "")"
+                <!--  <a class="pt-nav-link @(ctrl == "Prototipos" && ViewContext.RouteData.Values["action"]?.ToString() == "Usuarios" ? "active" : "")"
                    asp-controller="Prototipos" asp-action="Usuarios">
                     Gestión de Usuarios
-                </a>
+                </a>-->
             }
         </nav>
 

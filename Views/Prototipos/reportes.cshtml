@@ -1,78 +1,101 @@
+@using ProyectoFinal.Controllers
+@model ReporteDto
+
 @{
     ViewData["Title"] = "Reportes";
 }
 
-<div class="card shadow-sm mb-4">
-
-    <div class="card-body">
-
-        <div class="row">
-
-            <div class="col-md-4">
-                <label>Fecha Inicio</label>
-                <input type="date" class="form-control">
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card text-center border-left-primary">
+            <div class="card-body">
+                <i class="bi bi-currency-dollar display-4 text-primary mb-3" style="font-size: 2rem;"></i>
+                <h6 class="text-muted">Ventas Totales</h6>
+                <h3 class="text-primary">₡@Model.VentasTotales.ToString("N2")</h3>
+                <small class="text-muted">Todos los datos</small>
             </div>
-
-            <div class="col-md-4">
-                <label>Fecha Fin</label>
-                <input type="date" class="form-control">
-            </div>
-
-            <div class="col-md-4 d-flex align-items-end">
-                <button class="btn btn-primary w-100">
-                    Generar Reporte
-                </button>
-            </div>
-
         </div>
-
     </div>
 
+    <div class="col-md-4">
+        <div class="card text-center border-left-success">
+            <div class="card-body">
+                <i class="bi bi-box-seam display-4 text-success mb-3" style="font-size: 2rem;"></i>
+                <h6 class="text-muted">Productos Vendidos</h6>
+                <h3 class="text-success">@Model.ProductosVendidos</h3>
+                <small class="text-muted">unidades en total</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card text-center border-left-warning">
+            <div class="card-body">
+                <i class="bi bi-exclamation-triangle display-4 text-warning mb-3" style="font-size: 2rem;"></i>
+                <h6 class="text-muted">Productos Stock Bajo</h6>
+                <h3 class="text-warning">@Model.ProductosStockBajo.Count</h3>
+                <small class="text-muted">requieren reposición</small>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="row g-3">
-
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <h6>Ventas Totales</h6>
-                <h3>₡8.5M</h3>
+<!-- Tabla de productos con stock bajo -->
+@if (Model.ProductosStockBajo.Any())
+{
+    <div class="card shadow-sm">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">
+                <i class="bi bi-exclamation-triangle"></i> Productos con Stock Bajo
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Producto</th>
+                            <th>Categoría</th>
+                            <th>Stock Actual</th>
+                            <th>Precio</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var producto in Model.ProductosStockBajo)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@producto.Nombre</strong>
+                                </td>
+                                <td>@producto.CategoriaNombre</td>
+                                <td>
+                                    @if (producto.Stock <= 5)
+                                    {
+                                        <span class="badge bg-danger">@producto.Stock unidades</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">@producto.Stock unidades</span>
+                                    }
+                                </td>
+                                <td>₡@producto.Precio.ToString("N2")</td>
+                                <td>
+                                    <a href="/Productos/Edit/@producto.Id" class="btn btn-sm btn-outline-primary" title="Editar">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <h6>Productos Vendidos</h6>
-                <h3>580</h3>
-            </div>
-        </div>
+}
+else
+{
+    <div class="alert alert-success" role="alert">
+        <i class="bi bi-check-circle"></i> <strong>¡Excelente!</strong> Todos los productos tienen stock adecuado.
     </div>
-
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <h6>Clientes Nuevos</h6>
-                <h3>35</h3>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="card text-center">
-            <div class="card-body">
-                <h6>Ganancia</h6>
-                <h3>₡2.1M</h3>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-<div class="card mt-4 shadow-sm">
-    <div class="card-body text-center py-5">
-        <i class="bi bi-graph-up-arrow display-1 text-success"></i>
-        <h4>Gráfico de Ventas</h4>
-    </div>
-</div>
+}
