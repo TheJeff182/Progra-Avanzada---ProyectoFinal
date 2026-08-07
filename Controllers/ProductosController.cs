@@ -1,11 +1,13 @@
 using ProyectoFinal.Data;
 using ProyectoFinal.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 namespace ProyectoFinal.Controllers;
 
+[Authorize(Roles = "Admin,Ventas")]
 public class ProductosController : Controller
 {
     private readonly PixelTicoContext _context;

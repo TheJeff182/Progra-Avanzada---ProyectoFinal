@@ -15,6 +15,8 @@
     @{
         var ctrl = ViewContext.RouteData.Values["controller"]?.ToString();
         var pageTitle = ViewData["Title"]?.ToString() ?? "PixelTico";
+        var isAdmin = User.IsInRole("Admin");
+        var isVentas = User.IsInRole("Ventas");
     }
 
     <!-- ── Sidebar ── -->
@@ -39,45 +41,44 @@
                 Productos
             </a>
 
-        </a>
-        <a class="pt-nav-link @(ctrl == "Clientes" ? "active" : "")"
-           asp-controller="Clientes" asp-action="Index">
-            Clientes
-        </a>
+            @if (isAdmin || isVentas)
+            {
+                <a class="pt-nav-link @(ctrl == "Clientes" ? "active" : "")"
+                   asp-controller="Clientes" asp-action="Index">
+                    Clientes
+                </a>
+            }
 
-        <div class="pt-nav-label">Ventas</div>
-        <a class="pt-nav-link @(ctrl == "Ventas" ? "active" : "")"
-           asp-controller="Ventas" asp-action="Index">
-            Nueva Venta
-        </a>
-        <a class="pt-nav-link @(ctrl == "Pedidos" ? "active" : "")"
-           asp-controller="Pedidos" asp-action="Index">
-            Historial de Ventas
-        </a>
+            @if (isVentas || isAdmin)
+            {
+                <div class="pt-nav-label">Ventas</div>
+                <a class="pt-nav-link @(ctrl == "Ventas" ? "active" : "")"
+                   asp-controller="Ventas" asp-action="Index">
+                    Nueva Venta
+                </a>
+                <a class="pt-nav-link @(ctrl == "Pedidos" ? "active" : "")"
+                   asp-controller="Pedidos" asp-action="Index">
+                    Historial de Ventas
+                </a>
+            }
 
-        <div class="pt-nav-label">Prototipos</div>
-
-        <a class="pt-nav-link @(ctrl == "Login" ? "active" : "")"
-           asp-controller="Prototipos" asp-action="Login">
-            Login
-        </a>
-
-        <a class="pt-nav-link @(ctrl == "Dashboard" ? "active" : "")"
-           asp-controller="Prototipos" asp-action="Dashboard">
-            Dashboard
-        </a>
-
-        <a class="pt-nav-link @(ctrl == "Reportes" ? "active" : "")"
-           asp-controller="Prototipos" asp-action="Reportes">
-            Reportes
-        </a>
-
-        <a class="pt-nav-link @(ctrl == "Usuarios" ? "active" : "")"
-           asp-controller="Prototipos" asp-action="Usuarios">
-            Usuarios
-        </a>
-
-    </nav>
+            @if (isAdmin)
+            {
+                <div class="pt-nav-label">Administración</div>
+                <a class="pt-nav-link @(ctrl == "Prototipos" && ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")"
+                   asp-controller="Prototipos" asp-action="Dashboard">
+                    Dashboard
+                </a>
+                <a class="pt-nav-link @(ctrl == "Prototipos" && ViewContext.RouteData.Values["action"]?.ToString() == "Reportes" ? "active" : "")"
+                   asp-controller="Prototipos" asp-action="Reportes">
+                    Reportes
+                </a>
+                <a class="pt-nav-link @(ctrl == "Prototipos" && ViewContext.RouteData.Values["action"]?.ToString() == "Usuarios" ? "active" : "")"
+                   asp-controller="Prototipos" asp-action="Usuarios">
+                    Gestión de Usuarios
+                </a>
+            }
+        </nav>
 
     <div class="pt-sidebar-footer">
         PixelTico &copy; @DateTime.Now.Year
@@ -94,15 +95,17 @@
             {
                 <div class="pt-user-badge">
                     <div class="pt-avatar">@User.Identity.Name?.Substring(0,1).ToUpper()</div>
-                    @User.Identity.Name
+                    <span>@User.Identity.Name</span>
+                    @if (isAdmin) { <span class="badge bg-danger ms-2">Admin</span> }
+                    @if (isVentas) { <span class="badge bg-info ms-2">Ventas</span> }
                     <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline; margin-left:8px;">
-                        <button type="submit" class="btn btn-sm btn-outline-light">Cerrar sesión</button>
+                        <button type="submit" class="btn btn-sm btn-primary">Cerrar sesión</button>
                     </form>
                 </div>
             }
             else
             {
-                <a class="btn btn-sm btn-outline-light" asp-controller="Account" asp-action="Login">Iniciar sesión</a>
+                <a class="btn btn-sm btn-primary" asp-controller="Account" asp-action="Login">Iniciar sesión</a>
             }
         </div>
     </div>

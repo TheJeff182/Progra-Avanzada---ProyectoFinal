@@ -1,9 +1,11 @@
 using ProyectoFinal.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace ProyectoFinal.Data;
 
-public class PixelTicoContext : DbContext
+public class PixelTicoContext : IdentityDbContext<IdentityUser>
 {
     public PixelTicoContext(DbContextOptions<PixelTicoContext> options)
         : base(options)
