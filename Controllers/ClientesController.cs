@@ -36,9 +36,9 @@ public class ClientesController : Controller
             var total = await query.CountAsync();
             var totalPages = (int)Math.Ceiling(total / (double)PageSize);
 
-            // Validar pagina
+       
             if (page < 1) page = 1;
-            if (page > totalPages) page = totalPages;
+            if (totalPages > 0 && page > totalPages) page = totalPages;
 
             var clientes = await query
                 .OrderBy(c => c.Nombre)
@@ -251,8 +251,7 @@ public class ClientesController : Controller
     }
 
     // POST: Clientes/CrearRapido
-    // Endpoint API (JSON) usado por AJAX desde Ventas, para no obligar a salir de esa pantalla
-    // cuando el cliente que se busca todavía no existe en el sistema.
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> CrearRapido([FromBody] CrearClienteRapidoDto request)

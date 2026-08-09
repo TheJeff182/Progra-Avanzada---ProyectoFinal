@@ -1,0 +1,47 @@
+﻿@model List<ProyectoFinal.Controllers.UsuarioRolViewModel>
+@{
+    ViewData["Title"] = "Administración de Usuarios";
+}
+
+<div class="d-flex justify-content-between mb-3">
+    <h4 class="fw-bold mb-0">Administración de Usuarios</h4>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-primary">
+                <tr>
+                    <th>Correo</th>
+                    <th>Rol actual</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var usuario in Model)
+                {
+                    <tr>
+                        <td>@usuario.Email</td>
+                        <td>
+                            @{
+                                var badgeClass = usuario.RolActual switch
+                                {
+                                    "Admin" => "bg-danger",
+                                    "Ventas" => "bg-info",
+                                    "Operaciones" => "bg-warning",
+                                    _ => "bg-secondary"
+                                };
+                            }
+                            <span class="badge @badgeClass">@usuario.RolActual</span>
+                        </td>
+                        <td>
+                            <a asp-action="CambiarRol" asp-route-id="@usuario.Id" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-pencil"></i> Cambiar rol
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

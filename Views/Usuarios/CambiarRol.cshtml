@@ -1,0 +1,36 @@
+﻿@model ProyectoFinal.Controllers.UsuarioRolViewModel
+@{
+    ViewData["Title"] = "Cambiar rol";
+    var roles = (string[])ViewData["roles"]!;
+}
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h4 class="fw-bold mb-0">Cambiar rol</h4>
+    </div>
+    <div class="col-md-4 text-end">
+        <a asp-action="Index" class="btn btn-secondary">Volver</a>
+    </div>
+</div>
+
+<div class="table-card p-4" style="max-width: 480px;">
+    <p class="mb-1 text-muted">Usuario</p>
+    <p class="fw-bold mb-3">@Model.Email</p>
+
+    <p class="mb-1 text-muted">Rol actual</p>
+    <p class="mb-4"><span class="badge bg-secondary">@Model.RolActual</span></p>
+
+    <form asp-action="CambiarRol" asp-route-id="@Model.Id" method="post">
+        <div class="mb-3">
+            <label for="nuevoRol" class="form-label">Nuevo rol</label>
+            <select name="nuevoRol" id="nuevoRol" class="form-select">
+                @foreach (var rol in roles)
+                {
+                    <option value="@rol" selected="@(rol == Model.RolActual)">@rol</option>
+                }
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Guardar cambio</button>
+    </form>
+</div>

@@ -1,12 +1,18 @@
 @model ProyectoFinal.Models.ErrorViewModel
 @{
-    ViewData["Title"] = "Error";
+    var codigo = Model.StatusCode ?? 500;
+    ViewData["Title"] = codigo == 404 ? "Página no encontrada" : "Error";
+    var emoji = codigo == 404 ? "🔍" : "⚠️";
+    var titulo = codigo == 404 ? "Página no encontrada (404)" : "Ocurrió un error (500)";
+    var mensaje = codigo == 404
+        ? "La página que buscas no existe o fue movida."
+        : "Algo salió mal al procesar tu solicitud.";
 }
 
 <div class="text-center py-5">
-    <p style="font-size:4rem;">⚠️</p>
-    <h2 class="fw-semibold mb-2">Ocurrió un error</h2>
-    <p class="text-muted mb-4">Algo salió mal al procesar tu solicitud.</p>
+    <p style="font-size:4rem;">@emoji</p>
+    <h2 class="fw-semibold mb-2">@titulo</h2>
+    <p class="text-muted mb-4">@mensaje</p>
 
     @if (Model.ShowRequestId)
     {

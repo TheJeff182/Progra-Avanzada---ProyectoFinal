@@ -17,6 +17,7 @@
         var pageTitle = ViewData["Title"]?.ToString() ?? "PixelTico";
         var isAdmin = User.IsInRole("Admin");
         var isVentas = User.IsInRole("Ventas");
+        var isOperaciones = User.IsInRole("Operaciones");
     }
 
     <!-- ── Sidebar ── -->
@@ -56,6 +57,14 @@
                    asp-controller="Ventas" asp-action="Index">
                     Nueva Venta
                 </a>
+            }
+
+            @if (isVentas || isAdmin || isOperaciones)
+            {
+                @if (!isVentas && !isAdmin)
+                {
+                    <div class="pt-nav-label">Ventas</div>
+                }
                 <a class="pt-nav-link @(ctrl == "Pedidos" ? "active" : "")"
                    asp-controller="Pedidos" asp-action="Index">
                     Historial de Ventas
@@ -67,63 +76,73 @@
                 <div class="pt-nav-label">Administración</div>
                 <!--  <a class="pt-nav-link @(ctrl == "Prototipos" && ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "")"
                    asp-controller="Prototipos" asp-action="Dashboard">
-                    Dashboard 
+                    Dashboard
             </a>  -->
 
                 <a class="pt-nav-link @(ctrl == "Prototipos" && ViewContext.RouteData.Values["action"]?.ToString() == "Reportes" ? "active" : "")"
                    asp-controller="Prototipos" asp-action="Reportes">
                     Reportes
                 </a>
-                <!--  <a class="pt-nav-link @(ctrl == "Prototipos" && ViewContext.RouteData.Values["action"]?.ToString() == "Usuarios" ? "active" : "")"
-                   asp-controller="Prototipos" asp-action="Usuarios">
+                <a class="pt-nav-link @(ctrl == "Usuarios" ? "active" : "")"
+                   asp-controller="Usuarios" asp-action="Index">
                     Gestión de Usuarios
-                </a>-->
+                </a>
             }
         </nav>
 
-    <div class="pt-sidebar-footer">
-        PixelTico &copy; @DateTime.Now.Year
-    </div>
-</aside>
+        <div class="pt-sidebar-footer">
+            PixelTico &copy; @DateTime.Now.Year
+        </div>
+    </aside>
 
-<!-- ── Topbar ── -->
-<div class="pt-topbar">
-    <span class="pt-topbar-title">@pageTitle</span>
-    <div class="pt-topbar-right">
-        <span>@DateTime.Now.ToString("dd/MM/yyyy")</span>
-        <div>
-            @if (User?.Identity?.IsAuthenticated ?? false)
-            {
-                <div class="pt-user-badge">
-                    <div class="pt-avatar">@User.Identity.Name?.Substring(0,1).ToUpper()</div>
-                    <span>@User.Identity.Name</span>
-                    @if (isAdmin) { <span class="badge bg-danger ms-2">Admin</span> }
-                    @if (isVentas) { <span class="badge bg-info ms-2">Ventas</span> }
-                    <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline; margin-left:8px;">
-                        <button type="submit" class="btn btn-sm btn-primary">Cerrar sesión</button>
-                    </form>
-                </div>
-            }
-            else
-            {
-                <a class="btn btn-sm btn-primary" asp-controller="Account" asp-action="Login">Iniciar sesión</a>
-            }
+    <!-- ── Topbar ── -->
+    <div class="pt-topbar">
+        <span class="pt-topbar-title">@pageTitle</span>
+        <div class="pt-topbar-right">
+            <span>@DateTime.Now.ToString("dd/MM/yyyy")</span>
+            <div>
+                @if (User?.Identity?.IsAuthenticated ?? false)
+                {
+                    <div class="pt-user-badge">
+                        <div class="pt-avatar">@User.Identity.Name?.Substring(0, 1).ToUpper()</div>
+                        <span>@User.Identity.Name</span>
+                        @if (isAdmin)
+                        {
+                            <span class="badge bg-danger ms-2">Admin</span>
+                        }
+                        @if (isVentas)
+                        {
+                            <span class="badge bg-info ms-2">Ventas</span>
+                        }
+                        @if (isOperaciones)
+                        {
+                            <span class="badge bg-warning ms-2">Operaciones</span>
+                        }
+                        <form asp-controller="Account" asp-action="Logout" method="post" style="display:inline; margin-left:8px;">
+                            <button type="submit" class="btn btn-sm btn-primary">Cerrar sesión</button>
+                        </form>
+                    </div>
+                }
+                else
+                {
+                    <a class="btn btn-sm btn-primary" asp-controller="Account" asp-action="Login">Iniciar sesión</a>
+                }
+            </div>
         </div>
     </div>
-</div>
 
-<!-- ── Contenido ── -->
-<main class="pt-main">
-    <partial name="_Alerts" />
-    @RenderBody()
-</main>
+    <!-- ── Contenido ── -->
+    <main class="pt-main">
+        <partial name="_Alerts" />
+        @RenderBody()
+    </main>
 
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
-<script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
-<script src="~/js/site.js" asp-append-version="true"></script>
-@await RenderSectionAsync("Scripts", required: false)
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+    <script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
 
 </body>
 </html>

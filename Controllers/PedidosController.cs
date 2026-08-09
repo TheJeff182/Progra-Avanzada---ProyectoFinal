@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ProyectoFinal.Controllers;
 
-[Authorize(Roles = "Admin,Ventas")]
+[Authorize(Roles = "Admin,Ventas,Operaciones")]
 public class PedidosController : Controller
 {
     private readonly PixelTicoContext _context;
@@ -126,9 +126,10 @@ public class PedidosController : Controller
     // y recalcula subtotal/impuestos/total en el SERVIDOR (no confía en lo que muestra el navegador).
     // Es de solo lectura (no guarda nada), se usa para el "cálculo en vivo" mientras se arma el pedido.
     // También devuelve "descuento" (monto total rebajado en $) para mostrarlo en el carrito.
-    // TODO: agregar [Authorize] cuando Identity esté integrado.
+    // Protegido por [Authorize(Roles = "Admin,Ventas")] a nivel de clase (solo autenticados).
     [HttpPost]
     [Route("/api/pedidos/calcular")]
+    [Authorize(Roles = "Admin,Ventas")]
     public async Task<IActionResult> Calcular([FromBody] List<CalcularLineaDto>? lineas)
     {
         try
@@ -179,6 +180,7 @@ public class PedidosController : Controller
     // (nunca se confía en los valores que envía el navegador) y se valida el stock disponible.
     [HttpPost]
     [ValidateAntiForgeryToken]
+    [Authorize(Roles = "Admin,Ventas")]
     public async Task<IActionResult> Crear([FromBody] CrearPedidoDto request)
     {
         if (request == null || request.Items == null || request.Items.Count == 0)
@@ -192,12 +194,24 @@ public class PedidosController : Controller
             return BadRequest(new { error = "Debe seleccionar un cliente válido" });
         }
 
-        // TODO: reemplazar por el usuario autenticado cuando se implemente el login real.
-        // Por ahora se usa el primer usuario registrado como "usuario del sistema".
-        var usuario = await _context.Usuarios.FirstOrDefaultAsync();
+        // Se busca/crea el registro en la tabla "Usuario" (de negocio, distinta de AspNetUsers de
+        // Identity) correspondiente a la persona realmente autenticada, para que el pedido quede
+        // atribuido a quien de verdad hizo la venta y no a un usuario fijo.
+        var emailActual = User.Identity?.Name;
+        if (string.IsNullOrEmpty(emailActual))
+        {
+            return Unauthorized(new { error = "No se pudo identificar al usuario autenticado" });
+        }
+
+        var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == emailActual);
         if (usuario == null)
         {
-            return StatusCode(500, new { error = "No hay un usuario del sistema configurado" });
+            // Primera venta de este usuario de Identity: se crea su fila correspondiente
+            // en la tabla de negocio "Usuario", usando su rol actual.
+            var rol = User.IsInRole("Admin") ? "Admin" : "Ventas";
+            usuario = new Usuario { Nombre = emailActual, Email = emailActual, Rol = rol };
+            _context.Usuarios.Add(usuario);
+            await _context.SaveChangesAsync();
         }
 
         // Agrupar por si el mismo producto llegó repetido en el request.

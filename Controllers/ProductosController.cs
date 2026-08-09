@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace ProyectoFinal.Controllers;
 
-[Authorize(Roles = "Admin,Ventas")]
+[Authorize(Roles = "Admin,Ventas,Operaciones")]
 public class ProductosController : Controller
 {
     private readonly PixelTicoContext _context;
@@ -48,9 +48,9 @@ public class ProductosController : Controller
             var total = await query.CountAsync();
             var totalPages = (int)Math.Ceiling(total / (double)PageSize);
 
-            // Validar página
+          
             if (page < 1) page = 1;
-            if (page > totalPages) page = totalPages;
+            if (totalPages > 0 && page > totalPages) page = totalPages;
 
             var productos = await query
                 .OrderBy(p => p.Nombre)
@@ -171,6 +171,7 @@ public class ProductosController : Controller
     }
 
     // GET: Productos/Delete/
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(int? id)
     {
         if (id == null)
@@ -188,6 +189,7 @@ public class ProductosController : Controller
 
     // POST: Productos/Delete
     [HttpPost, ActionName("Delete")]
+    [Authorize(Roles = "Admin")]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
@@ -237,7 +239,7 @@ public class ProductosController : Controller
             }
 
             query = query
-                .OrderBy(p => p.Stock == 0) // false (0) primero => con stock antes que sin stock
+                .OrderBy(p => p.Stock == 0) 
                 .ThenBy(p => p.Nombre);
 
             var total = await query.CountAsync();
@@ -271,8 +273,7 @@ public class ProductosController : Controller
     // GET: /api/productos/buscar?q=play
     // Endpoint conforme al enunciado del proyecto (sección 3): autosuggest AJAX,
     // hasta 10 coincidencias, forma de respuesta { id, nombre, precio, impuesto, stock }.
-    // TODO: agregar [Authorize] cuando Identity esté integrado (el enunciado pide que
-    // solo usuarios autenticados puedan consumir los endpoints de la API).
+    // Protegido por [Authorize(Roles = "Admin,Ventas")] a nivel de clase (solo autenticados).
     [HttpGet]
     [Route("/api/productos/buscar")]
     public async Task<IActionResult> BuscarApi(string? q)

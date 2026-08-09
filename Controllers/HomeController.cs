@@ -22,11 +22,13 @@ public class HomeController : Controller
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
+    [Route("Home/Error/{statusCode?}")]
+    public IActionResult Error(int? statusCode = null)
     {
-        var errorViewModel = new ErrorViewModel 
-        { 
-            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier 
+        var errorViewModel = new ErrorViewModel
+        {
+            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier,
+            StatusCode = statusCode
         };
         return View(errorViewModel);
     }

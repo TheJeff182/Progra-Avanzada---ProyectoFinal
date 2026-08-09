@@ -25,6 +25,8 @@ public class Producto
     [Range(0, int.MaxValue, ErrorMessage = "El stock no puede ser negativo")]
     public int Stock { get; set; }
 
+    [Required(ErrorMessage = "La imagen es requerida")]
+    [Url(ErrorMessage = "Debe ser una URL válida")]
     [StringLength(500)]
     public string? ImagenUrl { get; set; }
 

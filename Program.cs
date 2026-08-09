@@ -33,6 +33,10 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+// Maneja códigos de estado como 404 (que no lanzan una excepción, así que
+// UseExceptionHandler no los captura) redirigiendo a una vista de error específica.
+app.UseStatusCodePagesWithReExecute("/Home/Error/{0}");
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
@@ -53,7 +57,7 @@ using (var scope = app.Services.CreateScope())
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
 
-    string[] roles = new[] { "Admin", "Ventas" };
+    string[] roles = new[] { "Admin", "Ventas", "Operaciones" };
     foreach (var role in roles)
     {
         if (!await roleManager.RoleExistsAsync(role))
